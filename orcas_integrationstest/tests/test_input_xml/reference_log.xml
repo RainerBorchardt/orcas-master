@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="drop" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_DEFAULT" myattribute="mytext">
+    <!-- mycomment -->
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_DEFAULT" />
+    <statement>alter table TAB_DEL_COL add col_add varchar2(1)</statement>
+  </diff-action>
+  <diff-action type="create" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="ADD_ORCAS">
+    <diff-action-reason type="missing" object-type="table" subobject-type="column" object-name="TAB_DEL_COL" subobject-name="ADD_ORCAS" />
+    <statement>alter table TAB_DEL_COL add ADD_ORCAS NUMBER(15) not null</statement>
+  </diff-action>
+</diff-actions>

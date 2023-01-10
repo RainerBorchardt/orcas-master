@@ -1,0 +1,55 @@
+apply plugin: 'java'
+
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId_postfix = 'generated'
+project.ext.extensiondependent = false
+project.ext.maven_description = 'orcas generated code (besides from xtext)'
+
+configurations 
+{
+  generatorRunPath 
+  {
+  }
+}
+
+dependencies 
+{
+  generatorRunPath project(':orcas')
+  compile project(':orcas')
+  compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+  compile group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+}
+
+task(createGenDirs) 
+{
+  doFirst
+  {
+    new File("${buildDir}/srcgen/src/de/opitzconsulting/orcas/orig/diff").mkdirs();
+  }
+  outputs.file "${buildDir}/srcgen"
+}
+
+task(generateDiffJava, dependsOn: createGenDirs, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath 
+
+  main = "de.opitzconsulting.orcas.ot.JavaOdGenerator"
+  args "${buildDir}/srcgen/src/de/opitzconsulting/orcas/orig/diff"
+  args "orig"
+
+  outputs.file args[0]
+}
+
+//compileJava.source "${buildDir}/srcgen"
+compileJava.dependsOn generateDiffJava
+
+sourceSets {
+  main {
+    java {
+      srcDirs "${buildDir}/srcgen/src"
+    }
+  }
+}
+
+
+

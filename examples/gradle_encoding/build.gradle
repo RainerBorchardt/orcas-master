@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '7.8.6'
+
+        classpath group: 'com.oracle.ojdbc', name: 'ojdbc10', version: '19.3.0.0'
+    }
+}
+
+apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+               
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@192.168.56.10:1522:m2dc"
+          username = "orcas_orderentry"
+          password = "orcas_orderentry"
+          loglevel = "info"
+          charsetname = "UTF-16"
+          charsetnamesqllog = "UTF-8"
+          viewextractmode = "full"
+}
+

@@ -1,0 +1,54 @@
+project.ext.project_dir        = "../orcas"
+project.ext.mwe2_file_name     = "src/de/opitzconsulting/GenerateOrcasDsl.mwe2"
+project.ext.postfix            = "syex"
+project.ext.xtext_project_name = "orcas"
+
+apply from: '../xtext_generator_build_with_plsql_plugin.gradle'
+
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId_postfix = 'syex'
+project.ext.extensiondependent = true
+project.ext.maven_description = 'orcas model modified by syntax extensions (contains the original model). If custom-syntax-extensions are provided, there will be a custom artifact.'
+
+apply from: '../build_sqlplus_dir_acc.gradle'
+generateJavaSqlplusDirAccessClass.sqlplusDirFilenameList "/sql/replaceables/types/ot_${project.ext.postfix}.sql"
+
+dependencies 
+{
+   project(':orcas_xtext_extension.generator')
+}
+
+task(generateObjectTypes, dependsOn: createSqlplusDir, type: JavaExec) 
+{
+  classpath configurations.generatorRunPath
+
+  main = "de.opitzconsulting.orcas.ot.OracleOtGenerator"
+  args "${buildDir}/sqlplus/sql/replaceables/types/ot_${project.ext.postfix}.sql"
+  args project.ext.postfix
+
+  outputs.file args[0]
+}
+
+task(copyGeneratedXtextFileToOriginalFilesToBuild, dependsOn: copyOriginalFilesToBuild, type: Copy)
+{
+  from "${project(':orcas_xtext_extension.generator').buildDir}/xtext_syex"
+  into "${project.ext.copy_original_folder}/src"
+}
+
+
+copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn copyOriginalFilesToBuild
+copyGeneratedXtextFileToOriginalFilesToBuild.dependsOn ':orcas_xtext_extension.generator:build'
+
+generateXtext.dependsOn copyGeneratedXtextFileToOriginalFilesToBuild
+
+processResources.dependsOn generateObjectTypes
+
+sourceSets {
+  main {
+    resources  {
+      srcDirs "${buildDir}/sqlplus"
+    }
+  }
+}
+
+

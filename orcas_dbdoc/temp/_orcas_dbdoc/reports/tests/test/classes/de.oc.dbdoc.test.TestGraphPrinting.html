@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - TestGraphPrinting</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>TestGraphPrinting</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/de.oc.dbdoc.test.html">de.oc.dbdoc.test</a> &gt; TestGraphPrinting</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">10</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.040s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">testGraphTable1Table2</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testGraphTable1Table3</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testGraphTable1Table3OutrefOnly</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable1</td>
+<td class="success">0.024s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable1OutrefOnly</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable1WithAllAncestors</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable2</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable2OutrefOnly</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable2WithAllAncestors</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">testSingleTable3WithAllDescendants</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\l...\l}&quot;]
+subgraph cluster_t1 { label=&quot;T1&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T1 [URL=&quot;tab_t1.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T1 [URL=&quot;tab_t1.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_REF,\l...\l}&quot;]
+T3 [URL=&quot;tab_t3.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\l...\l}&quot;]
+subgraph cluster_t2 { label=&quot;T2&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T1 [URL=&quot;tab_t1.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_REF,\l...\l}&quot;]
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\l...\l}&quot;]
+subgraph cluster_t3_descendants { label=&quot;T3-Descendants&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T3 [URL=&quot;tab_t3.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T2 [URL=&quot;tab_t2_outref.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\l...\l}&quot;]
+subgraph cluster_t1 { label=&quot;T1&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index_outref.html&quot;
+T1 [URL=&quot;tab_t1_outref.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T3 [URL=&quot;tab_t3.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\lC_REF,\l...\l}&quot;]
+T5 [URL=&quot;tab_t5.html&quot;,tooltip=&quot;T5&quot;,label=&quot;{T5\l|C_ID,\l...\l}&quot;]
+subgraph cluster_t2_ancestors { label=&quot;T2-Ancestors&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T5 -&gt; T3 [label=&quot;T3_TO_T5&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T3 [URL=&quot;tab_t3.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\l...\l}&quot;]
+subgraph cluster_d1 { label=&quot;D1&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T1 [URL=&quot;tab_t1.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_ID,\lC_REF,\lC3\l}&quot;]
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\l...\l}&quot;]
+T5 [URL=&quot;tab_t5.html&quot;,tooltip=&quot;T5&quot;,label=&quot;{T5\l|C_ID,\l...\l}&quot;]
+subgraph cluster_d1 { label=&quot;D1&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T1 [URL=&quot;tab_t1.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_ID,\lC_REF,\lC3\l}&quot;]
+T3 [URL=&quot;tab_t3.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T5 -&gt; T3 [label=&quot;T3_TO_T5&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T2 [URL=&quot;tab_t2_outref.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\l...\l}&quot;]
+T5 [URL=&quot;tab_t5_outref.html&quot;,tooltip=&quot;T5&quot;,label=&quot;{T5\l|C_ID,\l...\l}&quot;]
+subgraph cluster_d1 { label=&quot;D1&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index_outref.html&quot;
+T1 [URL=&quot;tab_t1_outref.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_ID,\lC_REF,\lC3\l}&quot;]
+T3 [URL=&quot;tab_t3_outref.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T5 -&gt; T3 [label=&quot;T3_TO_T5&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T3 [URL=&quot;tab_t3_outref.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\l...\l}&quot;]
+subgraph cluster_t2 { label=&quot;T2&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index_outref.html&quot;
+T2 [URL=&quot;tab_t2_outref.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+digraph G {
+graph [nodesep=&quot;1&quot;, overlap=&quot;false&quot;, ranksep=&quot;2&quot;, splines=&quot;polyline&quot;];
+edge [fontname=&quot;Sans&quot;,fontsize=10,labelfontname=&quot;Sans&quot;,labelfontsize=10];
+node [fontname=&quot;Sans&quot;,fontsize=10,shape=record,style=filled];
+T2 [URL=&quot;tab_t2.html&quot;,tooltip=&quot;T2&quot;,label=&quot;{T2\l|C_ID,\lC_REF,\l...\l}&quot;]
+T3 [URL=&quot;tab_t3.html&quot;,tooltip=&quot;T3&quot;,label=&quot;{T3\l|C_ID,\lC_REF,\l...\l}&quot;]
+T5 [URL=&quot;tab_t5.html&quot;,tooltip=&quot;T5&quot;,label=&quot;{T5\l|C_ID,\l...\l}&quot;]
+subgraph cluster_t1_ancestors { label=&quot;T1-Ancestors&quot; style=&quot;dashed&quot; fontsize=&quot;20&quot; URL=&quot;index.html&quot;
+T1 [URL=&quot;tab_t1.html&quot;,tooltip=&quot;T1&quot;,label=&quot;{T1\l|C_ID,\lC_REF,\lC3\l}&quot;]
+}
+T2 -&gt; T1 [label=&quot;T1_TO_T2&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T3 -&gt; T2 [label=&quot;T2_TO_T3&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+T5 -&gt; T3 [label=&quot;T3_TO_T5&quot;, taillabel=&quot;&quot;, headlabel=&quot;*&quot;,dir=back,arrowhead=none,arrowtail=none]
+}
+
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 7.6</a> at 06.01.2023, 10:49:48</p>
+</div>
+</div>
+</body>
+</html>

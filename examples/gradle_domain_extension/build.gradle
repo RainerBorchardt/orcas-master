@@ -1,0 +1,76 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-domainextension-gradle-plugin',
+                  version: '7.8.6'
+
+        classpath group: 'com.oracle.ojdbc', name: 'ojdbc10', version: '19.3.0.0'
+    }
+}
+
+apply plugin: 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+               
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@192.168.56.10:1522:m2dc"
+          username = "orcas_orderentry"
+          password = "orcas_orderentry"
+          loglevel = "info"
+          extractmodelinputfolder = "src/main/sql/statics/domains"
+}
+
+
+// dbdoc example:
+dbdoc.configure {
+  tableregistry {
+    nonHistTables {
+      includes = ".*";
+      exclude ".*_H";
+    }
+    histTables {
+      includes = ".*_H";
+    }
+    allTables {
+      includes = ".*";
+    }
+    orderTables {
+      include "ORDER.*";
+      exclude ".*_H";
+    }
+  }
+
+  diagram {
+    label = "Database-Full"
+    tablegroup = tableregistry.allTables
+    subinnclude = "diagramsonly"
+
+    diagram {
+      label = "Database"
+      tablegroup = tableregistry.nonHistTables
+    }
+
+    diagram {
+      label = "Hist-Tables"
+      tablegroup = tableregistry.histTables
+    }
+  }
+
+  styles {
+    diagrams {
+    }
+    tables {
+      style {
+        name = "fillcolor"
+        value = "#40ff40"
+        tablegroup = tableregistry.orderTables
+      }
+      style {
+        name = "fillcolor"
+        value = "#808080"
+        tablegroup = tableregistry.histTables
+      }
+    }
+  }
+}

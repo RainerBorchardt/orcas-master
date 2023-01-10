@@ -1,0 +1,1950 @@
+<?xml version="1.0" encoding="windows-1250"?>
+<project name="OC_Schemaverwaltung_Default_Tasks">
+   
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Properties fuer den SCS User
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~** -->
+  <property name="orcas_util_scripts" value="${orcas_dir}/build_source/orcas_db_objects/scripts/util" />
+  <property name="orcas_install_scripts" value="${orcas_dir}/sql_util_scripts/static" />
+  <property name="orcas_at_value" value="@" />
+  <property name="orcas_internal_no_clean_initialize" value="true" />
+  <property name="orcas.default_loglevel" value="info" />
+  <property name="orcas_internal.nologging_loglevel" value="nologging" />
+  <property name="orcas.default_scriptmode" value="sqlplus" />
+  <property name="orcas.default_failonerror" value="default" />
+  <property name="orcas.default_java_fork" value="true" />
+
+  <tstamp>
+    <format property="timestamp" pattern="dd_MM_yyyy_HH_mm_ss" />
+  </tstamp>
+  <property name="orcas_build_start_time" value="${timestamp}" />
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Taskdefinitionen aus externen Jar-Files
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" />
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro fuer den Aufruf von SQL-Plus
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_internal_sql_plus">
+    <attribute name="user" />
+    <attribute name="password" />
+    <attribute name="tnsname" />
+    <attribute name="script" />
+    <attribute name="parameter" default="" />
+    <attribute name="tmpfolder" />
+    <attribute name="use-define" default="false" />
+    <attribute name="failonerror" default="false" />
+    <attribute name="spool-file" default="" />
+    <attribute name="spool-append" default="false" />
+    <attribute name="pre-line-1" default="" />
+    <attribute name="pre-line-2" default="" />
+    <attribute name="pre-line-3" default="" />
+    <attribute name="pre-line-4" default="" />
+    <attribute name="pre-line-5" default="" />
+    <attribute name="pre-line-6" default="" />
+    <attribute name="pre-line-7" default="" />
+    <attribute name="pre-line-8" default="" />
+    <attribute name="pre-line-9" default="" />
+    <attribute name="batchmode" default="false" />
+    <attribute name="rollbackonerror" default="false" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="executiondir" default="${basedir}"/>
+    <sequential>
+    <if>
+      <equals arg1="@{loglevel}" arg2="info"/>
+      <then>
+        <if>
+          <not>
+            <equals arg1="@{parameter}" arg2=""/>
+          </not>
+          <then>
+            <echo level="info" message="Execute @{script} with Parameter: @{parameter}"/>
+          </then>
+          <else>
+            <echo level="info" message="Execute @{script}"/>
+          </else>
+        </if>
+      </then>
+      <elseif>
+        <equals arg1="@{loglevel}" arg2="debug"/>
+        <then>
+        <echo level="info" message="Execute @{script} with Parameter: @{parameter}, failonerror: @{failonerror}, batchmode: @{batchmode}, spool-file: @{spool-file}, spool-append: @{spool-append}, rollbackonerror: @{rollbackonerror}," />
+       
+        <if>
+          <not>
+            <equals arg1="@{pre-line-1}" arg2=""/>
+          </not>
+          <then>
+             <echo level="info" message="Pre-Lines: @{pre-line-1}  @{pre-line-2}  @{pre-line-3}  @{pre-line-4}  @{pre-line-5}  @{pre-line-6}  @{pre-line-7}  @{pre-line-8}  @{pre-line-9}"/>
+          </then>
+        </if>
+      </then>
+      </elseif>
+    </if>
+      <property name="tmp_script_name" value="@{tmpfolder}/tmp_script.sql" />    
+      <if>
+        <and>
+          <available file="${tmp_script_name}" />
+          <equals arg1="@{batchmode}" arg2="false" />
+        </and>
+        <then>
+          <move file="${tmp_script_name}" tofile="${tmp_script_name}.bak" />
+        </then>
+      </if>
+      <if>
+        <or>
+          <equals arg1="@{use-define}" arg2="true" />
+          <not>
+            <equals arg1="@{spool-file}" arg2="" />
+          </not>
+          <not>
+            <equals arg1="@{batchmode}" arg2="false" />
+          </not>
+          <not>
+            <equals arg1="@{rollbackonerror}" arg2="false" />
+          </not>
+          <not>
+            <or>
+              <equals arg1="@{failonerror}" arg2="false"/> 
+              <equals arg1="@{failonerror}" arg2="default"/> 
+            </or>
+          </not>
+        </or>
+        <then>
+          <if>
+            <not>
+              <available file="${tmp_script_name}" />
+            </not>
+            <then>
+              <if>
+                <available file="${tmp_script_name}" />
+                <then>
+                  <move file="${tmp_script_name}" tofile="${tmp_script_name}.bak" />
+                </then>
+              </if>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-1}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-2}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-3}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-4}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-5}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-6}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-7}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-8}${line.separator}
+              </concat>
+              <concat destfile="${tmp_script_name}" append="true">@{pre-line-9}${line.separator}
+              </concat>
+              <if>
+                <or>
+                  <not>
+                    <equals arg1="@{rollbackonerror}" arg2="false" />
+                  </not>
+                  <not>
+                    <or>
+                      <equals arg1="@{failonerror}" arg2="false"/> 
+                      <equals arg1="@{failonerror}" arg2="default"/> 
+                    </or>
+                  </not>
+                </or>
+                <then>
+                  <if>
+                    <not>
+                      <equals arg1="@{rollbackonerror}" arg2="true" />
+                    </not>
+                    <then>
+                      <concat destfile="${tmp_script_name}" append="true">WHENEVER SQLERROR EXIT 1 ${line.separator}
+                      </concat>
+                    </then>
+                    <else>
+                      <concat destfile="${tmp_script_name}" append="true">WHENEVER SQLERROR EXIT 1 ROLLBACK${line.separator}
+                      </concat>
+                    </else>
+                  </if>
+                </then>
+              </if>
+              <if>
+                <not>
+                  <equals arg1="@{spool-file}" arg2="" />
+                </not>
+                <then>
+                  <concat destfile="${tmp_script_name}" append="true">spool @{spool-file}
+                  </concat>
+                </then>
+              </if>
+
+            </then>
+          </if>
+          <if>
+            <not>
+              <equals arg1="@{batchmode}" arg2="done" />
+            </not>
+            <then>
+              <concat destfile="${tmp_script_name}" append="true">${orcas_at_value}@{script} @{parameter}
+              </concat>
+          </then>
+          </if>
+          <if>
+            <not>
+              <equals arg1="@{batchmode}" arg2="true" />
+            </not>
+            <then>
+              <exec executable="sqlplus" dir="@{executiondir}"  outputproperty="orcas_sql_output" resultproperty="orcas_sql_result">
+                <arg value="-S" />
+                <arg value="@{user}/@{password}${orcas_at_value}@{tnsname}" />
+                <arg value="${orcas_at_value}${tmp_script_name}" />
+                <arg line="@{parameter}" />
+              </exec>
+              <move file="${tmp_script_name}" tofile="${tmp_script_name}.bak" />
+            </then>
+          </if>
+        </then>
+        <else>
+          <exec executable="sqlplus"  dir="@{executiondir}" outputproperty="orcas_sql_output" resultproperty="orcas_sql_result" >
+            <arg value="-S" />
+            <arg value="@{user}/@{password}${orcas_at_value}@{tnsname}" />
+            <arg value="${orcas_at_value}@{script}" />
+            <arg line="@{parameter}" />
+          </exec>
+        </else>
+      </if>
+      <if>
+        <equals arg1="${orcas_sql_result}" arg2="1"/>
+        <then>
+          <echo level="warning">--------------------------------------------------------------------------------
+Bei dem Ausfuehren des Skriptes @{script} ist ein Fehler aufgetreten:
+${orcas_sql_output}
+--------------------------------------------------------------------------------
+          </echo>
+        </then>
+        <elseif>
+          <and>
+            <not>
+              <equals arg1="${orcas_sql_output}" arg2=""/>
+            </not>
+            <not>
+              <equals arg1="@{loglevel}" arg2="nologging"/>
+            </not>
+            <isset property="orcas_sql_output"/>
+          </and>
+          <then>
+            <echo message="${orcas_sql_output}"/>
+          </then>
+        </elseif>
+      </if>
+      <if>
+        <and>
+          <equals arg1="${orcas_sql_result}" arg2="1"/>
+          <equals arg1="@{failonerror}" arg2="true" />
+        </and>
+        <then>
+          <fail message="Der Buildvorgang wird aufgrund des Fehlers abgebrochen."/>
+        </then>
+      </if>
+      <var name="orcas_sql_output" unset="true"/>
+      <var name="orcas_sql_error" unset="true"/>
+      <var name="orcas_sql_result" unset="true"/>
+      <var name="tmp_script_name" unset="true" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_delete_directory">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="folder" />
+    <attribute name="backup-to-folder" default="" />
+    <sequential>
+    <if>
+      <equals arg1="@{logname}" arg2=""/>
+      <then>
+        <echo message="orcas_delete_directory"/>
+      </then>
+      <else>
+        <echo message="orcas_delete_directory Logname: @{Logname}"/>
+      </else>
+    </if>
+    <echo level="warning"  message="Verzeichnis @{folder} wird geloescht"/>
+      <if>
+        <not>
+          <equals arg1="@{backup-to-folder}" arg2="" />
+        </not>
+        <then>
+          <copy todir="@{backup-to-folder}">
+            <fileset dir="@{folder}">
+              <include name="**/*" />
+            </fileset>
+          </copy>
+        </then>
+      </if>
+      <delete dir="@{folder}" />
+    </sequential>
+  </macrodef>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro zur Ausf�hrung eines SQL-Skripts 
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_execute_script">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="script" />
+    <attribute name="parameter" default="" />
+    <attribute name="spoolparameter" default="@{parameter}" />
+    <attribute name="failonerror" default="${orcas.default_failonerror}" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="executiondir" default="${basedir}"/>
+    <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
+    <sequential>
+    <if>
+      <equals arg1="@{scriptmode}" arg2="jdbc"/>
+     
+      <then>
+     <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" maxmemory="512m" dir="@{executiondir}" failonerror="true" >
+        <arg value="prefix_${orcas.default_java_fork}"/>
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{script}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{failonerror}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_@{parameter}"/>
+      </java>
+      </then>
+      <else>    
+      <var name="orcas_internal_logging_active" unset="true" />
+     <if>
+        <equals arg1="@{logname}" arg2=""/>
+      <then>
+      </then>
+      <else>
+        <echo message="orcas_execute_script Logname: @{Logname}"/>
+      </else>
+    </if>
+      <if>
+        <and>
+          <not>
+            <equals arg1="@{spoolfolder}" arg2="" />
+          </not>
+          <equals arg1="@{logname}" arg2="" />
+        </and>
+        <then>
+          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
+        </then>
+        <elseif>
+          <and>
+            <not>
+              <equals arg1="@{spoolfolder}" arg2="" />
+            </not>
+            <not>
+              <equals arg1="@{logname}" arg2="" />
+            </not>
+          </and>
+          <then>
+            <property name="orcas_internal_logging_active" value="true" />
+          </then>
+        </elseif>
+      </if>
+      <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{script}" executiondir="@{executiondir}" user="@{user}" password="@{password}" parameter="@{parameter}" tnsname="@{tnsname}" failonerror="@{failonerror}" tmpfolder="@{tmpfolder}" />
+      <if>
+        <isset property="orcas_internal_logging_active" />
+        <then>
+          <orcas_internal_log_skript logname="@{logname}" script="@{script}" spoolparameter="@{spoolparameter}" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}" />
+        </then>
+      </if>
+      </else>
+    </if>      
+    </sequential>
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro zur Ausf�hrung mehrere SQL-Skripte  
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_execute_scripts">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="spoolscriptname" default="false" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="failonerror" default="${orcas.default_failonerror}" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="executiondir" default="${basedir}"/>
+    <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
+    <sequential>
+    <if>
+      <equals arg1="@{scriptmode}" arg2="jdbc"/>
+     
+      <then>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" maxmemory="512m" failonerror="true" >
+        <arg value="prefix_${orcas.default_java_fork}"/>
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{scriptfolder}"/>
+        <arg value="prefix_@{scriptfolderrecursive}"/>
+        <arg value="prefix_@{scriptprefix}"/>
+        <arg value="prefix_@{scriptpostfix}"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{failonerror}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+        <arg value="prefix_"/>
+      </java>      
+      </then>
+      <else>
+     <if>
+      <equals arg1="@{logname}" arg2=""/>
+     
+      <then>
+        <echo message="orcas_execute_scripts"/>
+      </then>
+      <else>
+        <echo message="orcas_execute_scripts Logname: @{Logname}"/>
+      </else>
+    </if>
+      <if>
+        <and>
+          <not>
+            <equals arg1="@{spoolfolder}" arg2="" />
+          </not>
+          <equals arg1="@{logname}" arg2="" />
+        </and>
+        <then>
+          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
+        </then>
+        <elseif>
+          <and>
+            <not>
+              <equals arg1="@{spoolfolder}" arg2="" />
+            </not>
+            <not>
+              <equals arg1="@{logname}" arg2="" />
+            </not>
+          </and>
+          <then>
+            <property name="orcas_internal_logging_active" value="true" />
+          </then>
+        </elseif>
+      </if>
+      <if>
+        <equals arg1="@{scriptfolderrecursive}" arg2="false" />
+        <then>
+          <var name="orcas_internal_dir_depth" value="0" />
+        </then>
+        <elseif>
+          <equals arg1="@{scriptfolderrecursive}" arg2="true" />
+          <then>
+            <var name="orcas_internal_dir_depth" value="100" />
+          </then>
+        </elseif>
+        <else>
+          <fail message="Fuer den Parameter 'scriptfolderrecursive' sind nur die Werte 'true' oder 'false' zulaessig!" />
+        </else>
+      </if>
+      <for param="file">
+        <path>
+          <fileset dir="@{scriptfolder}" includes="**/@{scriptprefix}*@{scriptpostfix}">
+            <depth max="${orcas_internal_dir_depth}" />
+          </fileset>
+        </path>
+        <sequential>
+          <orcas_internal_sql_plus loglevel="@{loglevel}" batchmode="true" script="@{file}" executiondir="@{executiondir}" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+          <if>
+            <isset property="orcas_internal_logging_active" />
+            <then>
+              <orcas_internal_log_skript logname="@{logname}" script="@{file}" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}" spoolscriptname="@{spoolscriptname}"/>
+            </then>
+          </if>
+        </sequential>
+      </for>
+      <orcas_internal_sql_plus loglevel="@{loglevel}" batchmode="done" script="batchmode" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+      <var name="orcas_internal_logging_active" unset="true" />
+      </else>
+    </if>    
+    </sequential>    
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  ~~~~ Makro fuer den Aufruf von Skripten die nur einmal ausgefuehrt werden sollen
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_execute_one_time_scripts">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" />
+    <attribute name="spoolscriptname" default="false" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="failonerror" default="true" />
+    <attribute name="noexecute" default="false" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="scriptmode" default="${orcas.default_scriptmode}"/>
+    <sequential>
+    <if>
+      <equals arg1="@{scriptmode}" arg2="jdbc"/>
+     
+      <then>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <java classname="de.opitzconsulting.orcas.diff.OrcasScriptRunner" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" maxmemory="512m" failonerror="true" >
+        <arg value="prefix_${orcas.default_java_fork}"/>
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{scriptfolder}"/>
+        <arg value="prefix_@{scriptfolderrecursive}"/>
+        <arg value="prefix_@{scriptprefix}"/>
+        <arg value="prefix_@{scriptpostfix}"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{failonerror}"/>
+        <arg value="prefix_true"/>
+        <arg value="prefix_@{noexecute}"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{userorcas}"/>
+        <arg value="prefix_@{passwordorcas}"/>
+      </java>      
+      </then>
+      <else>    
+    <if>
+      <equals arg1="@{logname}" arg2=""/>
+      <then>
+        <echo message="orcas_execute_one_time_scripts"/>
+      </then>
+      <else>
+        <echo message="orcas_execute_one_time_scripts Logname: @{Logname}"/>
+      </else>
+    </if>
+      <var name="orcas_internal_logging_active" unset="true" />
+      <if>
+        <not>
+          <equals arg1="@{spoolfolder}" arg2="" />
+        </not>
+        <then>
+          <property name="orcas_internal_logging_active" value="true" />
+        </then>
+      </if>
+      <if>
+        <equals arg1="@{scriptfolderrecursive}" arg2="false" />
+        <then>
+          <var name="orcas_internal_dir_depth" value="0" />
+        </then>
+        <elseif>
+          <equals arg1="@{scriptfolderrecursive}" arg2="true" />
+          <then>
+            <var name="orcas_internal_dir_depth" value="100" />
+          </then>
+        </elseif>
+        <else>
+          <fail message="Fuer den Parameter 'scriptfolderrecursive' sind nur die Werte 'true' oder 'false' zulaessig!" />
+        </else>
+
+      </if>
+      <delete file="@{tmpfolder}/load_executed.txt" />
+      <orcas_internal_sql_plus loglevel="${orcas_internal.nologging_loglevel}" script="${orcas_util_scripts}/install_orcas_updates_if_needed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
+      <orcas_internal_sql_plus loglevel="${orcas_internal.nologging_loglevel}" script="${orcas_util_scripts}/load_executed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" use-define="true" spool-file="@{tmpfolder}/load_executed.txt" tmpfolder="@{tmpfolder}" failonerror="true" parameter="@{logname}" />
+      <replace file="@{tmpfolder}/load_executed.txt" value="" token="${line.separator}" />
+      <var name="orcas_internal_last_executed" unset="true" />
+      <loadproperties srcFile="@{tmpfolder}/load_executed.txt">
+        <filterchain>
+          <linecontains>
+            <contains value="orcas_internal_last_executed" />
+          </linecontains>
+        </filterchain>
+      </loadproperties>
+      <for param="file">
+        <path>
+          <fileset dir="@{scriptfolder}" includes="**/@{scriptprefix}*@{scriptpostfix}" excludes="${orcas_internal_last_executed}">
+            <depth max="${orcas_internal_dir_depth}" />
+          </fileset>
+        </path>
+        <sequential>
+          <if>
+            <equals arg1="@{noexecute}" arg2="false" />
+            <then>
+              <echo message="Fuhre Skript @{file} aus."/>
+              <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{file}" use-define="true" failonerror="@{failonerror}" rollbackonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" pre-line-1="set verify off" pre-line-2="set feedback off" pre-line-3="set define on" />
+              <if>
+                <isset property="orcas_internal_logging_active" />
+                <then>
+                  <orcas_internal_log_skript logname="@{logname}" script="@{file}" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}" spoolscriptname="@{spoolscriptname}"/>
+                </then>
+              </if>
+            </then>
+          </if>
+
+          <var name="orcas_internal_absolute_skriptfolder" unset="true" />
+          <var name="orcas_internal_file_path" unset="true" />
+          <dirname property="orcas_internal_absolute_skriptfolder" file="@{scriptfolder}" />
+          <pathconvert targetos="unix" property="orcas_internal_file_path">
+            <map from="${orcas_internal_absolute_skriptfolder}" to="" />
+            <path>
+              <pathelement location="@{file}" />
+            </path>
+          </pathconvert>
+          <orcas_internal_sql_plus loglevel="@{loglevel}" script="${orcas_util_scripts}/set_script_on_executed.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" parameter="${orcas_internal_file_path} @{logname}" failonerror="true" />
+        </sequential>
+      </for>
+      <var name="orcas_internal_logging_active" unset="true" />
+      </else>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_set_run_parameters">
+    <attribute name="user" />
+    <attribute name="password" />
+    <attribute name="userorcas" />
+    <attribute name="passwordorcas" />
+    <attribute name="tnsname" />
+    <attribute name="tmpfolder" />
+    <attribute name="logonly" />
+    <attribute name="dropmode" />
+    <attribute name="indexparallelcreate" />
+    <attribute name="indexmovetablespace" />
+    <attribute name="tablemovetablespace" />
+    <attribute name="createmissingfkindexes" />
+    <attribute name="excludewheretable" />
+    <attribute name="excludewheresequence" />
+    <attribute name="dateformat" />
+    <sequential>
+      <unzip dest="@{tmpfolder}/db_temp" overwrite="true">
+        <fileset dir="@{tmpfolder}/gradle_build" >
+          <include name="**/orcas_db_objects-*.jar"/>
+        </fileset>
+        <patternset>
+          <include name="**/b_pa_orcas_run_parameter.sql"/>
+        </patternset>
+      </unzip>
+      <copy tofile="@{tmpfolder}/b_pa_orcas_run_parameter.sql" overwrite="true" >
+        <fileset dir="@{tmpfolder}/db_temp">
+          <include name="**/b_pa_orcas_run_parameter.sql"/>
+        </fileset>
+        <filterchain>
+          <replacetokens>
+            <token key="excludewheresequence" value="@{excludewheresequence}"/>
+            <token key="excludewheretable" value="(@{excludewheretable}) and object_name not like ''ORCAS%''"/>
+            <token key="logonly" value="@{logonly}"/>
+            <token key="dropmode" value="@{dropmode}"/>
+            <token key="indexparallelcreate" value="@{indexparallelcreate}"/>
+            <token key="indexmovetablespace" value="@{indexmovetablespace}"/>
+            <token key="tablemovetablespace" value="@{tablemovetablespace}"/>
+            <token key="createmissingfkindexes" value="@{createmissingfkindexes}"/>
+            <token key="dateformat" value="@{dateformat}"/>
+          </replacetokens>
+        </filterchain>
+      </copy>
+      <orcas_internal_sql_plus script="@{tmpfolder}/b_pa_orcas_run_parameter.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true"/>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_log_action_start">
+    <attribute name="message" />
+    <attribute name="logname" />
+    <sequential>
+      <if>
+        <equals arg1="@{logname}" arg2=""/>
+        <then>
+          <echo message="@{message}"/>
+        </then>
+        <else>
+          <echo message="@{message} Logname: @{logname}"/>
+        </else>
+      </if>  
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_set_internal_dir_depth">
+    <attribute name="scriptfolderrecursive" />
+    <sequential>
+      <if>
+        <equals arg1="@{scriptfolderrecursive}" arg2="false" />
+        <then>
+          <var name="orcas_internal_dir_depth" value="0" />
+        </then>
+        <elseif>
+          <equals arg1="@{scriptfolderrecursive}" arg2="true" />
+          <then>
+            <var name="orcas_internal_dir_depth" value="100" />
+          </then>
+        </elseif>
+        <else>
+          <fail message="Fuer den Parameter 'scriptfolderrecursive=@{scriptfolderrecursive}' sind nur die Werte 'true' oder 'false' zulaessig!" />
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_set_logging_active">
+    <attribute name="spoolfolder" />
+    <attribute name="logname" />
+    <sequential>
+      <var name="orcas_internal_logging_active" unset="true" />
+      <if>
+        <and>
+          <not>
+            <equals arg1="@{spoolfolder}" arg2="" />
+          </not>
+          <equals arg1="@{logname}" arg2="" />
+        </and>
+        <then>
+          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
+        </then>
+        <elseif>
+          <and>
+            <not>
+              <equals arg1="@{spoolfolder}" arg2="" />
+            </not>
+            <not>
+              <equals arg1="@{logname}" arg2="" />
+            </not>
+          </and>
+          <then>
+            <property name="orcas_internal_logging_active" value="true" />
+          </then>
+        </elseif>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_spool_from_db">
+    <attribute name="user" />
+    <attribute name="password" />
+    <attribute name="userorcas" />
+    <attribute name="passwordorcas" />
+    <attribute name="tnsname" />
+    <attribute name="tmpfolder" />
+    <attribute name="spoolfolder" />
+    <attribute name="logname" />
+    <attribute name="autotimestamp" />
+    <sequential>
+      <orcas_internal_set_logging_active spoolfolder="@{spoolfolder}" logname="@{logname}" />
+      <if>
+        <isset property="orcas_internal_logging_active" />
+        <then>
+          <delete dir="@{tmpfolder}/@{logname}" />
+          <mkdir dir="@{tmpfolder}/@{logname}" />
+          <record name="@{tmpfolder}/@{logname}/@{logname}.sql" append="true" emacsmode="true" action="start" />
+          <orcas_internal_sql_plus loglevel="warning" script="${orcas_util_scripts}/select_tablescript_from_db.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+          <record name="@{tmpfolder}/@{logname}/@{logname}.sql" action="stop" />
+          <if>
+            <length file="@{tmpfolder}/@{logname}/@{logname}.sql" when="greater" length="0" />
+            <then>
+              <orcas_internal_log_skript logname="@{logname}" script="@{tmpfolder}/@{logname}/@{logname}.sql" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}"/>
+            </then>
+          </if>
+        </then>
+        <else>
+          <orcas_internal_sql_plus loglevel="warning" script="${orcas_util_scripts}/select_tablescript_from_db.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+        </else>
+      </if>
+      <var name="orcas_internal_logging_active" unset="true" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_schema_sync_statics">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="logonly" default="false" />
+    <attribute name="dropmode" default="false" />
+    <attribute name="indexparallelcreate" default="true" />
+    <attribute name="indexmovetablespace" default="true" />
+    <attribute name="tablemovetablespace" default="true" />
+    <attribute name="createmissingfkindexes" default="true" />
+    <attribute name="excludewheretable" default="object_name like ''%$%''" />
+    <attribute name="excludewheresequence" default="object_name like ''%$%''" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="dateformat" default="dd.mm.yy" />
+    <attribute name="srcuser" />
+    <attribute name="srcpassword" />
+    <attribute name="srcjdbcurl" default="${orcas.default_jdbcurl}" />
+    <sequential>  
+      <orcas_execute_statics user="@{user}" password="@{password}" jdbcurl="@{jdbcurl}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" logonly="@{logonly}" dropmode="@{dropmode}" scriptfolder="null" indexparallelcreate="@{indexparallelcreate}" indexmovetablespace="@{indexmovetablespace}" tablemovetablespace="@{tablemovetablespace}" createmissingfkindexes="false" excludewheretable="@{excludewheretable}" excludewheresequence="@{excludewheresequence}" loglevel="@{loglevel}" dateformat="@{dateformat}" orcasinternalsrcuser="@{srcuser}" orcasinternalsrcpassword="@{srcpassword}" orcasinternalsrcjdbcurl="@{srcjdbcurl}"/>
+    </sequential>    
+  </macrodef>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro fuer den Aufruf von Static-Skripten
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_execute_statics">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="logonly" default="false" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="null" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="dropmode" default="false" />
+    <attribute name="indexparallelcreate" default="true" />
+    <attribute name="indexmovetablespace" default="true" />
+    <attribute name="tablemovetablespace" default="true" />
+    <attribute name="createmissingfkindexes" default="true" />
+    <attribute name="excludewheretable" default="object_name like ''%$%''" />
+    <attribute name="excludewheresequence" default="object_name like ''%$%''" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="targetplsql" default="null" />
+    <attribute name="dateformat" default="dd.mm.yy" />
+    <attribute name="orcasinternalsrcuser" default="null" />
+    <attribute name="orcasinternalsrcpassword" default="null" />
+    <attribute name="orcasinternalsrcjdbcurl" default="null" />
+    <attribute name="orcasinternalsqlplustable" default="false" />
+    <attribute name="extensionparameter" default="${orcas_internal_extensionparameter}" />
+    <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+      <java classname="de.opitzconsulting.orcas.diff.OrcasMain" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="prefix_${orcas.default_java_fork}"/>
+        <arg value="prefix_oracle.jdbc.OracleDriver"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{user}"/>
+        <arg value="prefix_@{password}"/>
+        <arg value="prefix_@{scriptfolder}"/>
+        <arg value="prefix_@{spoolfolder}"/>
+        <arg value="prefix_@{logonly}"/>
+        <arg value="prefix_@{dropmode}"/>
+        <arg value="prefix_@{indexparallelcreate}"/>
+        <arg value="prefix_@{indexmovetablespace}"/>
+        <arg value="prefix_@{tablemovetablespace}"/>
+        <arg value="prefix_@{createmissingfkindexes}"/>
+        <arg value="prefix_@{excludewheretable}"/>
+        <arg value="prefix_@{excludewheresequence}"/>
+        <arg value="prefix_@{dateformat}"/>
+        <arg value="prefix_@{userorcas}"/>
+        <arg value="prefix_@{scriptfolderrecursive}"/>
+        <arg value="prefix_@{scriptprefix}"/>
+        <arg value="prefix_@{scriptpostfix}"/>
+        <arg value="prefix_@{loglevel}"/>
+        <arg value="prefix_@{targetplsql}"/>
+        <arg value="prefix_@{orcasinternalsrcjdbcurl}"/>
+        <arg value="prefix_@{orcasinternalsrcuser}"/>
+        <arg value="prefix_@{orcasinternalsrcpassword}"/>
+        <arg value="prefix_@{orcasinternalsqlplustable}"/>
+        <arg value="prefix_false"/>
+        <arg value="prefix_@{extensionparameter}"/>
+        <arg value="prefix_@{logname}"/>
+        <arg value="prefix_@{jdbcurl}"/>
+        <arg value="prefix_@{userorcas}"/>
+        <arg value="prefix_@{passwordorcas}"/>
+      </java>
+    </sequential>
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro zum L�schen von Replacable-Objekten
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_drop_replaceables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="orcasinternalinitialize" default="true" />
+    <attribute name="excludewhereview" default="object_name not like '%'" />
+    <attribute name="excludewhereobjecttype" default="object_name not like '%'" />
+    <attribute name="excludewherepackage" default="object_name not like '%'" />
+    <attribute name="excludewheretrigger" default="object_name not like '%'" />
+    <attribute name="excludewherefunction" default="object_name not like '%'" />
+    <attribute name="excludewhereprocedure" default="object_name not like '%'" />
+    <sequential>
+      <copy file="${orcas_util_scripts}/delete_replacable_objects.sql" tofile="@{tmpfolder}/delete_replacable_objects_tmp.sql" overwrite="true" />
+      <copy file="${orcas_util_scripts}/drop_all_types.sql" tofile="@{tmpfolder}/drop_all_types_tmp.sql" overwrite="true" />
+      <if>
+        <and>
+          <equals arg1="@{user}" arg2="@{userorcas}"/>
+          <equals arg1="@{orcasinternalinitialize}" arg2="true"/>  
+        </and>          
+        <then>
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="(@{excludewherepackage}) and (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;2" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;3" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2}" token="&amp;4" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="1=2" token="&amp;5" />
+          <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="(@{excludewhereobjecttype}) and (upper(object_name) like '%ORCAS%')" token="&amp;1" /> 
+        </then>
+        <else>
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherepackage}" token="&amp;1" />  
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewheretrigger}" token="&amp;2" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereview}" token="&amp;3" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewherefunction}" token="&amp;4" />
+          <replace file="@{tmpfolder}/delete_replacable_objects_tmp.sql" value="@{excludewhereprocedure}" token="&amp;5" /> 
+          <replace file="@{tmpfolder}/drop_all_types_tmp.sql" value="@{excludewhereobjecttype}" token="&amp;1" />        
+        </else>
+      </if>     
+     
+      <orcas_execute_script script="@{tmpfolder}/delete_replacable_objects_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+
+      <orcas_execute_script script="@{tmpfolder}/drop_all_types_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+    </sequential>
+  </macrodef>
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro zum L�schen von Replacable-Objekten
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_drop_java">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="excludewherejava" default="name like '%'" />
+    <sequential>
+      <copy file="${orcas_util_scripts}/drop_java_classes.sql" tofile="@{tmpfolder}/delete_java_tmp.sql" overwrite="true" />
+      <replace file="@{tmpfolder}/delete_java_tmp.sql" value="@{excludewherejava}" token="&amp;1" />
+
+      <orcas_execute_script script="@{tmpfolder}/delete_java_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+    </sequential>
+  </macrodef>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Entfernt alles (Constraints, Indizes...) bis auf die Daten der Tabellen
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_clean_tables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="excludewheretable" default="object_name like '%$%'" />
+    <sequential>
+      <copy file="${orcas_util_scripts}/clean_tables.sql" tofile="@{tmpfolder}/clean_tables_tmp.sql" overwrite="true" />
+      <replace file="@{tmpfolder}/clean_tables_tmp.sql" value="@{excludewheretable}" token="&amp;1" />
+
+      <orcas_execute_script script="@{tmpfolder}/clean_tables_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+    </sequential>
+  </macrodef>
+  
+  
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro zum L�schen von Jobs
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_kill_jobs">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="excludewherejobwhat" default="1=2" />
+    <sequential>
+      <copy file="${orcas_util_scripts}/kill_all_jobs.sql" tofile="@{tmpfolder}/kill_all_jobs_tmp.sql" overwrite="true" />
+      <replace file="@{tmpfolder}/kill_all_jobs_tmp.sql" value="@{excludewherejobwhat}" token="&amp;1" />
+      <orcas_execute_script script="@{tmpfolder}/kill_all_jobs_tmp.sql" failonerror="true" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+    </sequential>
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+    ~~~~ Makro zum Kompilieren von invaliden Datenbankobjekten
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_compile_db_objects">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="failonerror" default="true" />
+    <attribute name="logsinglecompile" default="false" />
+    <sequential>
+    <if>
+        <equals arg1="@{logname}" arg2=""/>
+      <then>
+        <echo message="orcas_compile_db_objects"/>
+      </then>
+      <else>
+        <echo message="orcas_compile_db_objects Logname: @{Logname}"/>
+      </else>
+    </if>
+      <if>
+        <and>
+          <not>
+            <equals arg1="@{spoolfolder}" arg2="" />
+          </not>
+          <equals arg1="@{logname}" arg2="" />
+        </and>
+        <then>
+          <fail message="Wenn das Spooling aktiviert ist, muss ein Logname angegeben werden!" />
+        </then>
+        <elseif>
+          <and>
+            <not>
+              <equals arg1="@{spoolfolder}" arg2="" />
+            </not>
+            <not>
+              <equals arg1="@{logname}" arg2="" />
+            </not>
+          </and>
+          <then>
+            <property name="orcas_internal_logging_active" value="true" />
+          </then>
+        </elseif>
+      </if>
+
+      <if>
+        <equals arg1="@{logsinglecompile}" arg2="false" />
+        <then>
+          <orcas_execute_script script="${orcas_util_scripts}/compile_all_invalid.sql" parameter="false" failonerror="@{failonerror}" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" autotimestamp="@{autotimestamp}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+        </then>
+        <else>
+          <orcas_internal_sql_plus loglevel="@{loglevel}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" failonerror="true" script="${orcas_util_scripts}/delete_sql_script_from_db.sql" tmpfolder="@{tmpfolder}" />
+          <orcas_internal_sql_plus script="${orcas_util_scripts}/compile_all_invalid.sql" user="@{user}" password="@{password}" parameter="@{userorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}"  failonerror="@{failonerror}"/>
+
+          <if>
+            <isset property="orcas_internal_logging_active" />
+            <then>
+              <mkdir dir="@{tmpfolder}/@{logname}" />
+              <record name="@{tmpfolder}/@{logname}/@{logname}.sql" append="true" emacsmode="true" action="start" />
+              <orcas_internal_sql_plus loglevel="warning" script="${orcas_util_scripts}/select_tablescript_from_db.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+              <record name="@{tmpfolder}/@{logname}/@{logname}.sql" action="stop" />
+              <if>
+                <length file="@{tmpfolder}/@{logname}/@{logname}.sql" when="greater" length="0" />
+                <then>
+                  <orcas_internal_log_skript logname="@{logname}" script="@{tmpfolder}/@{logname}/@{logname}.sql" spoolfolder="@{spoolfolder}" autotimestamp="@{autotimestamp}"/>
+                </then>
+              </if>
+            </then>
+            <else>
+              <orcas_internal_sql_plus loglevel="warning" script="${orcas_util_scripts}/select_tablescript_from_db.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+            </else>
+          </if>
+
+          <orcas_internal_sql_plus loglevel="@{loglevel}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" failonerror="false" script="${orcas_util_scripts}/delete_sql_script_from_db.sql" tmpfolder="@{tmpfolder}" />
+        </else>
+      </if>
+
+      <var name="orcas_internal_logging_active" unset="true" />
+    </sequential>
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  ~~~~ Makro zum Abgleichen von daten.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_upate_data">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />
+    <attribute name="logonly" default="false" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="true" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="dateformat" default="dd.mm.yy" />
+    <sequential>
+      <orcas_internal_log_action_start message="orcas_upate_data" logname="@{logname}" />
+      <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
+
+      <orcas_internal_set_run_parameters user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" dropmode="false" indexparallelcreate="" indexmovetablespace="" tablemovetablespace="" createmissingfkindexes="" excludewheretable="" excludewheresequence="" logonly="@{logonly}" dateformat="@{dateformat}"/>
+
+      <delete dir="@{tmpfolder}/data_concat"/>  
+      <mkdir dir="@{tmpfolder}/data_concat"/>  
+      <concat destfile="@{tmpfolder}/data_concat/data_concat.sql" append="false">
+        <fileset dir="@{scriptfolder}" includes="**/@{scriptprefix}*@{scriptpostfix}">
+          <depth max="${orcas_internal_dir_depth}" />
+        </fileset>
+      </concat>
+
+      <concat destfile="@{tmpfolder}/data_concat/data_concat.sql" append="true" eol="crlf">
+        <fileset dir="${orcas_dir}/sql_util_scripts" includes="call_orcas_data_merge.sql" />
+      </concat>
+  
+      <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/data_concat/data_concat.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
+
+      <orcas_internal_spool_from_db user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{spoolfolder}" logname="@{logname}" autotimestamp="@{autotimestamp}" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_check_connection">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasCheckConnection" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="@{jdbcurl}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+      </java>      
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_update_checksum">
+    <attribute name="userorcas" />
+    <attribute name="passwordorcas" />
+    <attribute name="tnsname" />
+    <attribute name="tmpfolder" />
+    <sequential>
+      <concat destfile="@{tmpfolder}/orcas_internal_checksum_old.properties" append="no">orcas_internal_total_checksum_old=${orcas_internal_total_checksum_new}</concat>
+      <concat destfile="@{tmpfolder}/orcas_internal_checksum_old.properties" append="yes">
+        orcas_internal_extension_checksum_java_old=${orcas_internal_extension_checksum_java_new}</concat>
+    </sequential>
+  </macrodef>       
+
+  <macrodef name="orcas_internal_gradle_build">
+    <attribute name="tmpfolder" />
+    <attribute name="extensionfolder" />
+    <attribute name="extensionextractfile" />
+    <attribute name="orcasprebuildversion" />
+    <sequential>
+      <property environment="orcas_internal_environment" />
+      <condition property="orcas_internal_gradle_path" value="${orcas_internal_environment.GRADLE_HOME}/bin/" else="">
+        <isset property="orcas_internal_environment.GRADLE_HOME"/>             
+      </condition>
+      <condition property="orcas_internal_gradle_executable" value="${orcas_internal_gradle_path}gradle.bat" else="${orcas_internal_gradle_path}gradle">
+        <os family="windows" />
+      </condition>              
+
+      <var name="orcas_internal_tmpfolder" unset="true" />
+      <var name="orcas_internal_extensionfolder" unset="true" />
+      <var name="orcas_internal_extensionextractfile" unset="true" />
+      <property name="orcas_internal_tmpfolder" location="@{tmpfolder}"/>
+      <if>
+        <equals arg1="@{extensionfolder}" arg2=""/>
+        <then>        
+          <mkdir dir="@{tmpfolder}/empty_extension_folder" />        
+          <property name="orcas_internal_extensionfolder" location="@{tmpfolder}/empty_extension_folder"/>
+        </then>
+        <else>        
+          <property name="orcas_internal_extensionfolder" location="@{extensionfolder}"/>
+        </else>
+      </if>
+      <if>
+        <equals arg1="@{extensionextractfile}" arg2=""/>
+        <then>        
+          <property name="orcas_internal_extensionextractfile" value=""/>
+        </then>
+        <else>        
+          <property name="orcas_internal_extensionextractfile" location="@{extensionextractfile}"/>
+        </else>
+      </if>      
+      
+      <exec executable="${orcas_internal_gradle_executable}" dir="${orcas_dir}/build_source" failonerror="true">
+        <arg value="installDist" />
+        <arg value="-Porcas_tmp_folder=${orcas_internal_tmpfolder}/gradle_build" />
+        <arg value="-Porcas_extension_folder=${orcas_internal_extensionfolder}" />
+        <arg value="-Porcas_extension_extract_file=${orcas_internal_extensionextractfile}" />
+        <arg value="-Porcas_prebuild_version=@{orcasprebuildversion}" />
+      </exec>
+    </sequential>
+  </macrodef>       
+
+  <macrodef name="orcas_internal_update_orcas_db">
+    <attribute name="userorcas" />
+    <attribute name="passwordorcas" />
+    <attribute name="tnsname" />
+    <attribute name="tmpfolder" />
+    <attribute name="jdbcurl" />
+    <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasInitializeOrcasDb" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="@{jdbcurl}"/>
+        <arg value="@{userorcas}"/>
+        <arg value="@{passwordorcas}"/>
+        <arg value="${orcas_internal_total_checksum_new}"/>
+        <arg value="${orcas_internal_extension_checksum_plsql_new}"/>
+      </java>      
+    </sequential>
+  </macrodef>      
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  ~~~~ Makro fuer die Initialisierung der Schemaverwaltung vor jedem Buildprozess
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_initialize">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="extensionfolder" default="" />
+    <attribute name="extensionparameter" default="" />
+    <attribute name="setupliquibase" default="false" />
+    <attribute name="prebuildmode" default="none" />
+    <attribute name="prebuildfile" default="" />
+    <attribute name="orcasinternalinstalldb" default="false" />
+    <attribute name="extensionextractfile" default="" />
+    <attribute name="orcasprebuildversion" default="" />
+    <sequential>
+      <fail message="Unsupported Java version: ${ant.java.version}. Java version 1.7 or greater required.">
+        <condition>
+          <or>
+            <equals arg1="${ant.java.version}" arg2="1.2"/>
+            <equals arg1="${ant.java.version}" arg2="1.3"/>
+            <equals arg1="${ant.java.version}" arg2="1.4"/>
+            <equals arg1="${ant.java.version}" arg2="1.5"/>
+          </or>    
+        </condition>
+      </fail>
+      <property environment="orcas_internal_environment" />
+      <fail message="No ORACLE_HOME set.">
+        <condition>
+          <not>
+            <isset property="orcas_internal_environment.ORACLE_HOME"/>  
+          </not>    
+        </condition>
+      </fail>      
+      <var name="orcas_internal_extensionparameter" unset="true" />
+      <property name="orcas_internal_extensionparameter" value="@{extensionparameter}" />
+      <var name="orcas_internal_install_db" unset="true" />
+      <if>
+        <not>
+          <equals arg1="@{extensionfolder}" arg2=""/>
+        </not>
+        <then> 
+          <for param="file">
+            <path>
+              <fileset dir="@{extensionfolder}" includes="*.sql">
+              </fileset>
+            </path>
+            <sequential>
+              <property name="orcas_internal_install_db" value="true" />
+            </sequential>
+          </for>
+        </then>
+      </if>
+      <condition property="orcas_internal_install_db" value="true" else="false">
+        <equals arg1="@{orcasinternalinstalldb}" arg2="true"/>
+      </condition>
+      
+      <if>
+        <not>
+          <equals arg1="${orcas_internal_skip_initialize}" arg2="true"/>
+        </not>
+        <then>        
+          <echo message="orcas_initialize"/>
+        
+          <mkdir dir="@{tmpfolder}" />
+
+          <touch file="@{tmpfolder}/dummyfile.txt"/>
+          <var name="orcas_internal_total_checksum_new" unset="true" />
+          <var name="orcas_internal_total_checksum_old" unset="true" />
+          <var name="orcas_internal_total_checksum_db" unset="true" />
+          <var name="orcas_internal_extension_checksum_java_new" unset="true" />
+          <var name="orcas_internal_extension_checksum_java_old" unset="true" />
+          <var name="orcas_internal_extension_checksum_plsql_new" unset="true" />
+          <var name="orcas_internal_extension_checksum_plsql_db" unset="true" />
+          <mkdir dir="@{tmpfolder}/cheksum_new" />
+          <checksum toDir="@{tmpfolder}/total_cheksum_new" forceoverwrite="true" totalproperty="orcas_internal_total_checksum_new">
+            <fileset dir="${orcas_dir}" includes="**/*" excludes="**/.gradle/**"/>
+            <fileset dir="@{extensionfolder}" includes="*.java">
+              <contains text="package de.opitzconsulting.orcas.syntax_extensions"/>              
+            </fileset>
+            <fileset dir="@{extensionfolder}" includes="*.sql" />
+          </checksum>
+          <checksum toDir="@{tmpfolder}/extension_checksum_java_new" forceoverwrite="true" totalproperty="orcas_internal_extension_checksum_java_new">
+            <fileset dir="@{extensionfolder}" includes="*.java">
+              <contains text="package de.opitzconsulting.orcas.extensions"/>              
+            </fileset>
+            <fileset dir="@{tmpfolder}" includes="dummyfile.txt" />
+          </checksum>          
+          <checksum toDir="@{tmpfolder}/extension_checksum_plsql_new" forceoverwrite="true" totalproperty="orcas_internal_extension_checksum_plsql_new">
+            <fileset dir="@{extensionfolder}" includes="*.sql" />
+            <fileset dir="@{tmpfolder}" includes="dummyfile.txt" />
+          </checksum>               
+          <property file="@{tmpfolder}/orcas_internal_checksum_old.properties"/>
+
+          <if>
+            <and>
+              <equals arg1="${orcas_internal_install_db}" arg2="true"/>
+              <equals arg1="${orcas_internal_total_checksum_new}" arg2="${orcas_internal_total_checksum_old}"/>
+            </and>
+            <then>     
+              <orcas_internal_sql_plus script="${orcas_util_scripts}/load_checksum.sql" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" use-define="true" spool-file="@{tmpfolder}/orcas_internal_checksum_db.properties" tmpfolder="@{tmpfolder}" failonerror="false" />
+              <loadproperties srcFile="@{tmpfolder}/orcas_internal_checksum_db.properties">
+                <filterchain>
+                  <tokenfilter>
+                    <trim/>
+                  </tokenfilter>
+                </filterchain>
+              </loadproperties> 
+            </then>
+            <else>
+              <property name="orcas_internal_total_checksum_db" value="${orcas_internal_total_checksum_new}" />
+              <property name="orcas_internal_extension_checksum_plsql_db" value="${orcas_internal_extension_checksum_plsql_new}" />
+            </else>
+          </if>
+      
+          <if>
+            <or>
+              <not>
+                <equals arg1="${orcas_internal_total_checksum_new}" arg2="${orcas_internal_total_checksum_old}"/>
+              </not>
+              <not>
+                <equals arg1="${orcas_internal_total_checksum_new}" arg2="${orcas_internal_total_checksum_db}"/>
+              </not>
+            </or>
+            <then>        
+              <if>
+                <not>
+                  <equals arg1="${orcas_internal_no_clean_initialize}" arg2="true"/>
+                </not>
+                <then>     
+                  <delete includeemptydirs="true">
+                    <fileset dir="@{tmpfolder}" includes="**/*" defaultexcludes="false" excludes="orcas_sqlplus_core/**/*" />
+                  </delete>
+                </then>     
+              </if>     
+              <if>
+                <equals arg1="@{prebuildmode}" arg2="use"/>
+                <then>      
+                  <delete dir="@{tmpfolder}/gradle_build"/>
+                  <mkdir dir="@{tmpfolder}/gradle_build"/>
+                  <unzip src="@{prebuildfile}" dest="@{tmpfolder}/gradle_build" />
+                </then>      
+                <else>
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" orcasprebuildversion="@{orcasprebuildversion}" />                
+                </else>
+              </if>      
+
+              <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
+              <if>
+                <equals arg1="@{setupliquibase}" arg2="true"/>
+                <then>        
+                  <orcas_liquibase changeLogFile="${orcas_dir}/sql_util_scripts/emptyChangeLog.xml" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" user="@{userorcas}" password="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" orcasinternalrundirect="true"/>  
+                </then>                  
+              </if>   
+              <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+            </then>      
+            <else>      
+              <if>
+                <or>
+                  <not>
+                    <equals arg1="${orcas_internal_extension_checksum_plsql_new}" arg2="${orcas_internal_extension_checksum_plsql_db}"/>
+                  </not>
+                  <not>
+                    <equals arg1="${orcas_internal_extension_checksum_java_new}" arg2="${orcas_internal_extension_checksum_java_old}"/>
+                  </not>
+                </or>
+                <then>            
+                  <echo message="skipping orcas_initialize (no changes core)"/>
+                  <fail message="Can't change extensions in prebuild-use mode.">
+                    <condition>
+                      <equals arg1="@{prebuildmode}" arg2="use"/>
+                    </condition>
+                  </fail>     
+                  <orcas_internal_gradle_build tmpfolder="@{tmpfolder}" extensionfolder="@{extensionfolder}" extensionextractfile="@{extensionextractfile}" orcasprebuildversion="@{orcasprebuildversion}" />
+                  <orcas_internal_update_orcas_db userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" jdbcurl="@{jdbcurl}" />
+                  <if>
+                    <not>
+                      <equals arg1="${orcas_internal_extension_checksum_java_new}" arg2="${orcas_internal_extension_checksum_java_old}"/>
+                    </not>
+                    <then>      
+                    </then>      
+                    <else>      
+                      <echo message="skipping orcas_initialize (no changes extension_java)"/>
+                    </else>      
+                  </if>                  
+                  <orcas_internal_update_checksum userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" />
+                </then>      
+                <else>      
+                  <echo message="skipping orcas_initialize (no changes)"/>
+                </else>      
+              </if>                  
+            </else>      
+          </if>      
+          <if>
+            <equals arg1="@{prebuildmode}" arg2="build"/>
+            <then>      
+              <delete file="@{prebuildfile}"/>
+              <zip destfile="@{prebuildfile}" >
+                <fileset dir="@{tmpfolder}/gradle_build" includes="*_distribution/**"/>
+              </zip>
+            </then>      
+          </if>      
+        </then>      
+        <else>      
+          <echo message="skipping orcas_initialize (orcas_internal_skip_initialize=${orcas_internal_skip_initialize})"/>
+        </else>      
+      </if>                
+    </sequential>
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  ~~~~ Makro fuer die Installierung der Schemaverwaltung
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_install">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tblspcorcas" default="" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <sequential>
+      <if>
+        <equals arg1="@{logname}" arg2=""/>
+        <then>
+          <echo message="orcas_install"/>
+        </then>
+        <else>
+          <echo message="orcas_install Logname: @{Logname}"/>
+        </else>
+      </if>
+
+      <if>
+          <equals arg1="@{user}" arg2="@{userorcas}"/>
+        <then>
+          <echo message="skipping create user, installing orcas in existing schema"/>
+        </then>
+        <else>
+          <if>
+            <equals arg1="@{tblspcorcas}" arg2=""/>
+            <then>
+              <orcas_execute_script  script="${orcas_install_scripts}/create_user/create_user.sql" failonerror="true" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" parameter="@{userorcas} @{passwordorcas}" />
+            </then>
+            <else>
+              <orcas_execute_script  script="${orcas_install_scripts}/create_user/create_user_with_tablespace.sql" failonerror="true" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" parameter="@{userorcas} @{passwordorcas} @{tblspcorcas}" />
+            </else>
+          </if>
+        </else>
+      </if>
+      
+      <orcas_execute_scripts  scriptfolder="${orcas_install_scripts}" failonerror="true" user="@{userorcas}" password="@{passwordorcas}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="" />
+      <echo level="info" message="orcas User erfolgreich installiert" />
+    </sequential>
+  </macrodef>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  ~~~~ Makro zum Loggen von ausgef�hrten Skripten. Nicht direkt aus Build aufrufen
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <macrodef name="orcas_internal_log_skript">
+    <attribute name="script" />
+    <attribute name="logname" />
+    <attribute name="spoolfolder" />
+    <attribute name="spoolparameter" default="" />
+    <attribute name="spoolscriptname" default="false" />
+    <attribute name="autotimestamp" default="false" />
+    <attribute name="parameter1" default="" />
+    <attribute name="parameter2" default="" />
+    <attribute name="parameter3" default="" />
+    <attribute name="parameter4" default="" />
+    <attribute name="parameter5" default="" />
+    <attribute name="parameter6" default="" />
+    <attribute name="parameter7" default="" />
+    <sequential>
+      <var name="orcas_master_log_update_needed" unset="true" />
+      <basename file="@{script}" property="orcas_script_basename" />
+      <if>
+        <equals arg1="@{autotimestamp}" arg2="true" />
+        <then>
+          <property name="orcas_log_folder_name" value="@{spoolfolder}_${orcas_build_start_time}" />
+        </then>
+        <else>
+          <property name="orcas_log_folder_name" value="@{spoolfolder}" />
+        </else>
+      </if>
+      <available file="${orcas_log_folder_name}" property="orcas_spoolFolderExist" />
+
+      <if>
+        <isset property="orcas_spoolFolderExist" />
+        <then>
+          <available file="${orcas_log_folder_name}/@{logname}" property="orcas_scriptTypeFolderExist" />
+          <mkdir dir="${orcas_log_folder_name}/@{logname}" />
+          <copy file="@{script}" todir="${orcas_log_folder_name}/@{logname}/" />
+          <if>
+            <equals arg1="@{spoolscriptname}" arg2="true" />
+            <then>
+              <echo file="${orcas_log_folder_name}/@{logname}/install_@{logname}.sql" message="PROMPT execute ${orcas_script_basename} @{spoolparameter} ${line.separator}" append="true" />
+            </then>
+          </if>
+          <echo file="${orcas_log_folder_name}/@{logname}/install_@{logname}.sql" message="${orcas_at_value}${orcas_at_value} ${orcas_script_basename} @{spoolparameter} ${line.separator}" append="true" />
+          <property name="orcas_loggedFileName" value="${orcas_log_folder_name}/@{logname}/${orcas_script_basename}" />
+
+        </then>
+        <else>
+          <mkdir dir="${orcas_log_folder_name}" />
+          <mkdir dir="${orcas_log_folder_name}/@{logname}" />
+          <copy file="@{script}" todir="${orcas_log_folder_name}/@{logname}" />
+          <if>
+            <equals arg1="@{spoolscriptname}" arg2="true" />
+            <then>
+              <echo file="${orcas_log_folder_name}/@{logname}/install_@{logname}.sql" message="PROMPT execute ${orcas_script_basename} @{spoolparameter} ${line.separator}" append="true" />
+            </then>
+          </if>
+          <echo file="${orcas_log_folder_name}/@{logname}/install_@{logname}.sql" message="${orcas_at_value}${orcas_at_value} ${orcas_script_basename} @{spoolparameter} ${line.separator}" append="true" />
+          <property name="orcas_loggedFileName" value="${orcas_log_folder_name}/@{logname}/${orcas_script_basename}" />
+        </else>
+      </if>
+      <if>
+        <not>
+          <equals arg1="@{parameter1}" arg2="" />
+        </not>
+        <then>
+          <replace file="${orcas_loggedFileName}" value="@{parameter1}" token="&amp;1" />
+          <replace file="${orcas_loggedFileName}" value="@{parameter2}" token="&amp;2" />
+          <replace file="${orcas_loggedFileName}" value="@{parameter3}" token="&amp;3" />
+          <replace file="${orcas_loggedFileName}" value="@{parameter4}" token="&amp;4" />
+          <replace file="${orcas_loggedFileName}" value="@{parameter5}" token="&amp;5" />
+          <replace file="${orcas_loggedFileName}" value="@{parameter6}" token="&amp;6" />
+          <replace file="${orcas_loggedFileName}" value="@{parameter7}" token="&amp;7" />
+        </then>
+      </if>
+
+      <if>
+        <available file="${orcas_log_folder_name}/master_install.sql" />
+        <then>
+          <loadfile srcfile="${orcas_log_folder_name}/master_install.sql" property="orcas_file_master_log" />
+          <condition property="orcas_master_log_update_needed">
+            <matches string="${orcas_file_master_log}" pattern="\w*@{logname}/install_@{logname}.sql" multiline="yes" />
+          </condition>
+          <if>
+            <not>
+              <isset property="orcas_master_log_update_needed" />
+            </not>
+            <then>
+              <echo file="${orcas_log_folder_name}/master_install.sql" message="${orcas_at_value}${orcas_at_value} @{logname}/install_@{logname}.sql @{spoolparameter} ${line.separator}" append="true" />
+            </then>
+          </if>
+        </then>
+        <else>
+          <echo file="${orcas_log_folder_name}/master_install.sql" message="${orcas_at_value}${orcas_at_value} @{logname}/install_@{logname}.sql @{spoolparameter} ${line.separator}" append="true" />
+        </else>
+      </if>
+      <var name="orcas_file_master_log" unset="true" />
+      <var name="orcas_master_log_update_needed" unset="true" />
+      <var name="orcas_spoolFolderExist" unset="true" />
+      <var name="orcas_scriptTypeFolderExist" unset="true" />
+      <var name="orcas_file_master_log" unset="true" />
+      <var name="orcas_loggedFileName" unset="true" />
+      <var name="orcas_script_basename" unset="true" />
+      <var name="orcas_log_folder_name" unset="true" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_internal_set_jdbc_url">
+    <attribute name="tnsname" />
+    <attribute name="jdbcurl" />
+    <sequential>
+      <var name="orcas_internal_jdbc_url" unset="true"/>
+      <if>
+        <equals arg1="@{jdbcurl}" arg2="$${orcas.default_jdbcurl}"/>
+        <then>
+          <property name="orcas_internal_jdbc_url" value="jdbc:oracle:oci:${orcas_at_value}@{tnsname}"/>
+        </then>
+        <else>
+          <property name="orcas_internal_jdbc_url" value="@{jdbcurl}"/>
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_extract">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="outputfolder" />
+    <attribute name="excludewheretable" default="object_name like ''%$%''" />
+    <attribute name="excludewheresequence" default="object_name like ''%$%''" />
+    <attribute name="orcasinternalloadxmlsql" default="load_extract.sql" />
+    <attribute name="dateformat" default="dd.mm.yy" />
+    <attribute name="loglevel" default="${orcas.default_loglevel}" />
+    <attribute name="scriptfolder" default="null" />
+    <attribute name="scriptprefix" default="null" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="removedefaultvalues" default="true" />
+    <attribute name="extensionparameter" default="null" />
+    <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractStatics" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="@{jdbcurl}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+        <arg value="@{scriptfolder}"/>
+        <arg value="@{excludewheretable}"/>
+        <arg value="@{excludewheresequence}"/>
+        <arg value="@{dateformat}"/>
+        <arg value="@{loglevel}"/>
+        <arg value="null"/>
+        <arg value="@{scriptfolderrecursive}"/>
+        <arg value="@{scriptprefix}"/>
+        <arg value="@{scriptpostfix}"/>
+        <arg value="@{userorcas}"/>
+        <arg value="false"/>
+        <arg value="@{removedefaultvalues}"/>
+        <arg value="true"/>
+        <arg value="@{jdbcurl}"/>
+        <arg value="@{userorcas}"/>
+        <arg value="@{passwordorcas}"/>        
+        <arg value="@{extensionparameter}"/>        
+        <arg value="@{outputfolder}"/>        
+      </java>      
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_extract_replaceables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="viewmode" default="text" />
+    <attribute name="outputfolder" />
+    <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasExtractReplaceables" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="${orcas_internal_jdbc_url}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+        <arg value="@{viewmode}"/>
+        <arg value="@{outputfolder}"/>
+      </java>      
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_update_replaceables">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="scriptfolder" />
+    <attribute name="logname" default="" />
+    <attribute name="viewmode" default="text" />
+    <sequential>
+      <path id="orcas_internal_orcas_diff_classpath">
+        <fileset dir="@{tmpfolder}/gradle_build/_distribution/install/distribution">
+          <include name="*.jar" />
+        </fileset>  
+      </path>
+
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <java classname="de.opitzconsulting.orcas.diff.OrcasUpdateReplaceables" classpathref="orcas_internal_orcas_diff_classpath" fork="${orcas.default_java_fork}" failonerror="true" maxmemory="512m">
+        <arg value="${orcas.default_java_fork}"/>
+        <arg value="oracle.jdbc.OracleDriver"/>
+        <arg value="${orcas_internal_jdbc_url}"/>
+        <arg value="@{user}"/>
+        <arg value="@{password}"/>
+        <arg value="@{viewmode}"/>
+        <arg value="@{spoolfolder}"/>
+        <arg value="@{scriptfolder}"/>
+        <arg value="@{logname}"/>
+      </java>          
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_extension_test">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="" />
+    <attribute name="scriptpostfix" default=".sql" />    
+    <attribute name="scriptfolderrecursive" default="false" />
+    <attribute name="outputfolder" />
+    <sequential>
+      <orcas_execute_statics user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" scriptfolder="@{scriptfolder}" scriptprefix="@{scriptprefix}" scriptpostfix="@{scriptpostfix}" scriptfolderrecursive="@{scriptfolderrecursive}" targetplsql="pa_orcas_extension_test" />
+      <orcas_extract user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" outputfolder="@{outputfolder}" orcasinternalloadxmlsql="load_extract_extension_test.sql" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_extract_data">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="outputfolder" />
+    <attribute name="scriptfolder" />
+    <attribute name="scriptprefix" default="" />
+    <attribute name="scriptpostfix" default=".sql" />
+    <attribute name="scriptfolderrecursive" default="false" />
+    <sequential>
+      <orcas_internal_set_internal_dir_depth scriptfolderrecursive="@{scriptfolderrecursive}" />
+
+      <delete dir="@{outputfolder}"/>
+      <mkdir dir="@{outputfolder}"/>
+      <delete dir="@{tmpfolder}/load_extract_data"/>  
+
+      <delete dir="@{tmpfolder}/data_extract"/>  
+      <mkdir dir="@{tmpfolder}/data_extract"/>  
+      <concat destfile="@{tmpfolder}/data_extract/data_extract.sql" append="false">
+        <fileset dir="@{scriptfolder}" includes="**/@{scriptprefix}*@{scriptpostfix}">
+          <depth max="${orcas_internal_dir_depth}" />
+        </fileset>
+      </concat>
+
+      <concat destfile="@{tmpfolder}/data_extract/data_extract.sql" append="true" eol="crlf">
+        <fileset dir="${orcas_dir}/sql_util_scripts" includes="call_orcas_data_extract.sql" />
+      </concat>
+  
+      <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/data_extract/data_extract.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" />
+
+      <orcas_internal_spool_from_db user="@{user}" password="@{password}" userorcas="@{userorcas}" passwordorcas="@{passwordorcas}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" spoolfolder="@{tmpfolder}/load_extract_data" logname="load_extract_data" autotimestamp="false" />
+      <orcas_internal_sql_plus loglevel="@{loglevel}" script="@{tmpfolder}/load_extract_data/load_extract_data.sql" user="@{user}" password="@{password}" tnsname="@{tnsname}" tmpfolder="@{tmpfolder}" failonerror="true" parameter="@{outputfolder}/"/>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_liquibase">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="changeLogFile" />
+    <attribute name="spoolfolder" default="${orcas.default_spoolfolder}" />
+    <attribute name="logname" default="" />    
+    <attribute name="contexts" default="" />    
+    <attribute name="orcasinternalrundirect" default="false" />    
+    <attribute name="failonerror" default="true" />
+    <sequential>
+      <orcas_internal_set_jdbc_url tnsname="@{tnsname}" jdbcurl="@{jdbcurl}" />
+      <if>
+        <equals arg1="@{orcasinternalrundirect}" arg2="false" />
+        <then>
+          <delete file="@{tmpfolder}/liquibaselog.sql" />
+          <ant antfile="${orcas_dir}/orcas_call_liquibase.xml" target="orcas_liquibase_update" >
+            <property name="user" value="@{user}"/>
+            <property name="password" value="@{password}"/>
+            <property name="userorcas" value="@{userorcas}"/>
+            <property name="passwordorcas" value="@{passwordorcas}"/>
+            <property name="tnsname" value="@{tnsname}"/>
+            <property name="jdbcurl" value="${orcas_internal_jdbc_url}"/>
+            <property name="tmpfolder" value="@{tmpfolder}"/>
+            <property name="changeLogFile" value="@{changeLogFile}"/>
+            <property name="contexts" value="@{contexts}"/>
+            <property name="outputFile" value="@{tmpfolder}/liquibaselog.sql"/>
+          </ant>
+          <!-- check @{tmpfolder}/liquibaselog.sql is "empty" -->
+          <copy file="@{tmpfolder}/liquibaselog.sql" tofile="@{tmpfolder}/liquibaselog_empty_check.sql" overwrite="true" />
+          <!-- remove comment lines -->
+          <replaceregexp file="@{tmpfolder}/liquibaselog_empty_check.sql" match="^--.*$" replace="" byline="true" />
+          <!-- remove SET DEFINE OFF; line -->
+          <replaceregexp file="@{tmpfolder}/liquibaselog_empty_check.sql" match="^SET DEFINE OFF;$" replace="" byline="true" />
+          <!-- remove empty lines -->
+          <copy file="@{tmpfolder}/liquibaselog_empty_check.sql" toFile="@{tmpfolder}/liquibaselog_empty_check_no_blank_lines.sql">
+            <filterchain>
+              <ignoreblank/>
+            </filterchain>
+          </copy>          
+          <!-- only execute liquibase generated file if not empty (this is to improve logging) -->
+          <if>
+            <length file="@{tmpfolder}/liquibaselog_empty_check_no_blank_lines.sql" when="greater" length="0" />
+            <then>
+              <orcas_execute_script script="@{tmpfolder}/liquibaselog.sql" failonerror="@{failonerror}" user="@{user}" password="@{password}" tmpfolder="@{tmpfolder}" tnsname="@{tnsname}" spoolfolder="@{spoolfolder}" logname="@{logname}" />
+            </then>
+          </if>
+        </then>
+        <else>
+          <ant antfile="${orcas_dir}/orcas_call_liquibase.xml" target="orcas_liquibase_update" >
+            <property name="user" value="@{user}"/>
+            <property name="password" value="@{password}"/>
+            <property name="userorcas" value="@{userorcas}"/>
+            <property name="passwordorcas" value="@{passwordorcas}"/>
+            <property name="tnsname" value="@{tnsname}"/>
+            <property name="jdbcurl" value="${orcas_internal_jdbc_url}"/>
+            <property name="tmpfolder" value="@{tmpfolder}"/>
+            <property name="changeLogFile" value="@{changeLogFile}"/>
+            <property name="contexts" value="@{contexts}"/>
+            <property name="outputFile" value=""/>
+          </ant>
+        </else>        
+      </if>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="orcas_liquibase_changelogsync">
+    <attribute name="user" default="${orcas.default_user}" />
+    <attribute name="password" default="${orcas.default_password}" />
+    <attribute name="userorcas" default="${orcas.default_user_orcas}" />
+    <attribute name="passwordorcas" default="${orcas.default_password_orcas}" />
+    <attribute name="tnsname" default="${orcas.default_tnsname}" />
+    <attribute name="jdbcurl" default="${orcas.default_jdbcurl}" />
+    <attribute name="tmpfolder" default="${orcas.default_tmpfolder}" />
+    <attribute name="changeLogFile" />
+    <sequential>
+      <ant antfile="${orcas_dir}/orcas_call_liquibase.xml" target="orcas_liquibase_changelogsync" >
+        <property name="user" value="@{user}"/>
+        <property name="password" value="@{password}"/>
+        <property name="userorcas" value="@{userorcas}"/>
+        <property name="passwordorcas" value="@{passwordorcas}"/>
+        <property name="tnsname" value="@{tnsname}"/>
+        <property name="jdbcurl" value="@{jdbcurl}"/>
+        <property name="tmpfolder" value="@{tmpfolder}"/>
+        <property name="changeLogFile" value="@{changeLogFile}"/>
+      </ant>
+    </sequential>
+  </macrodef>
+</project>
+

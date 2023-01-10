@@ -1,0 +1,82 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies 
+{
+  implementation  'junit:junit:4.12'
+  implementation  group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
+                  version: '7.8.6'
+
+  implementation  group: 'com.oracle.ojdbc', name: 'ojdbc10', version: '19.3.0.0'
+}
+
+
+test.outputs.upToDateWhen { false }
+
+test {
+    loadPropertyFile( "../../distribution/custom.properties", project );
+    loadPropertyFile( "../../custom.properties", project );
+    loadPropertyFile( "distribution/default_location.properties", project );
+
+    println "--- location: ${project.location} ---"
+
+    loadPropertyFile( "../../distribution/integrationstest/${project.location}/location.properties", project );
+    loadPropertyFile( "../../distribution/${project.location}/location.properties", project );
+    loadPropertyFile( "distribution/${project.location}/location.properties", project );
+    loadPropertyFile( "distribution/default.properties", project );
+
+    systemProperty "orcas.integrationtest.workfolder",                   "" + buildDir + "/gradle_tests/"
+
+// setup reference only command line options: -Pwith_second_run_empty_test=false -Pwith_run_with_spool_test=false -Pwith_run_with_extract_test=false -Pwith_first_run_test=false
+    systemProperty "orcas.integrationtest.with_second_run_empty_test",   with_second_run_empty_test
+    systemProperty "orcas.integrationtest.with_run_with_spool_test",     with_run_with_spool_test
+    systemProperty "orcas.integrationtest.with_run_with_extract_test",   with_run_with_extract_test
+    systemProperty "orcas.integrationtest.with_first_run_test",          with_first_run_test
+    systemProperty "orcas.integrationtest.execute_tests",                execute_tests
+
+    systemProperty "orcas.integrationtest.available_feature_list",       available_feature_list
+    systemProperty "orcas.integrationtest.jdbc_url",                     default_jdbcurl
+    systemProperty "orcas.integrationtest.jdbc_user",                    username_dba
+    systemProperty "orcas.integrationtest.jdbc_password",                password_dba
+    systemProperty "orcas.integrationtest.alternate_tablespace_1",       alternate_tablespace_1
+    systemProperty "orcas.integrationtest.alternate_tablespace_2",       alternate_tablespace_2
+
+    systemProperty "junit.parallel.threads" ,                            parallel_threads
+
+    testLogging {
+        events "started", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+def loadPropertyFile(String pFileName, Project pProject) {
+    def lProperties = new Properties()
+    def lFile = new File(pFileName)
+
+    if( !lFile.exists() )
+    {
+      return
+    }
+
+    lProperties.load(new FileInputStream(lFile))
+
+    lProperties.each 
+    { 
+      key, val ->
+
+      if( !project.hasProperty(key) )
+      {
+        project.ext.set( key, val )
+      }
+    }
+}
+
+
+
+
+
+

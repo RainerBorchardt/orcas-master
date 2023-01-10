@@ -1,0 +1,71 @@
+apply plugin: 'groovy'
+
+apply from: '../maven_publish.gradle'
+project.ext.maven_artifactId_postfix = 'gradle-plugin'
+project.ext.extensiondependent = true
+project.ext.maven_description = 'orcas gradle plugin'
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.11.0"
+    }
+}
+
+apply plugin: "com.gradle.plugin-publish"
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile project(':orcas_main_extensionhandler')
+    compile project(':orcas_dbdoc')
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir "../../sql_util_scripts"
+        }
+    }
+}
+
+javadocJar.dependsOn groovydoc
+
+javadocJar.from groovydoc.destinationDir
+
+pluginBundle {
+    website = 'http://www.orcasdb.org/'
+    vcsUrl = 'https://github.com/opitzconsulting/orcas'
+    description = 'Orcas is a schema management and deployment framework for Oracle Databases.'
+    tags = ['sql', 'oracle']
+
+    plugins {
+        orcasPlugin {
+            if(getRootProject().hasProperty('extensionname_internal'))
+            {
+              id = 'com.opitzconsulting.orcas.orcas-gradle-plugin-' + getRootProject().extensionname_internal
+              displayName = 'Orcas plugin (' + getRootProject().extensionname_internal + ")"
+            }
+            else
+            {
+              id = 'com.opitzconsulting.orcas.orcas-gradle-plugin'
+              displayName = 'Orcas plugin'
+            }
+        }
+    }
+    mavenCoordinates {
+        groupId = project.group
+        if(getRootProject().hasProperty('extensionname_internal'))
+        {
+          artifactId = "orcas-" + getRootProject().extensionname_internal + "-gradle-plugin"
+        }
+        else
+        {
+          artifactId = "orcas-gradle-plugin"
+        }
+        version = project.version
+   }
+}

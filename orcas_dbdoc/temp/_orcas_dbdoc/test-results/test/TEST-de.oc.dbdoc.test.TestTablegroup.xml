@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="de.oc.dbdoc.test.TestTablegroup" tests="7" skipped="0" failures="0" errors="0" timestamp="2023-01-06T09:49:48" hostname="LAPTOP-LM9GEKRQ" time="0.005">
+  <properties/>
+  <testcase name="testExcludes" classname="de.oc.dbdoc.test.TestTablegroup" time="0.001"/>
+  <testcase name="testIncludeExcludes" classname="de.oc.dbdoc.test.TestTablegroup" time="0.0"/>
+  <testcase name="testExcludeTableGroup" classname="de.oc.dbdoc.test.TestTablegroup" time="0.001"/>
+  <testcase name="testIncludesExclude" classname="de.oc.dbdoc.test.TestTablegroup" time="0.0"/>
+  <testcase name="testIncludes" classname="de.oc.dbdoc.test.TestTablegroup" time="0.0"/>
+  <testcase name="testIncludeExclude" classname="de.oc.dbdoc.test.TestTablegroup" time="0.0"/>
+  <testcase name="testSimple" classname="de.oc.dbdoc.test.TestTablegroup" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

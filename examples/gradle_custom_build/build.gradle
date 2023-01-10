@@ -1,0 +1,55 @@
+buildscript {
+    repositories {
+       mavenLocal()
+       mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.opitzconsulting.orcas', name: 'orcas-gradle-plugin',
+                  version: '7.8.6'
+
+        classpath group: 'com.oracle.ojdbc', name: 'ojdbc10', version: '19.3.0.0'
+    }
+}
+
+import com.opitzconsulting.orcas.gradle.*;
+
+extensions.create("orcasconfiguration", OrcasGradlePluginExtension)
+
+task('cleanLog', type:  OrcasCleanLogTask)
+
+task('preStatics', dependsOn: 'cleanLog', type: ExecuteOrcasOneTimeScriptsTask){
+  scriptfolder="src/main/scripts/pre-statics"
+  logname="pre-statics"
+}
+
+task('statics', dependsOn: 'preStatics', type:  OrcasUpdateStaticsTask){
+  scriptFiles=project.fileTree("src/main/sql/statics")
+}
+
+task('dropReplaceables', dependsOn: 'statics', type:  OrcasDropReplaceablesTask)
+
+task('installReplaceables', dependsOn: 'dropReplaceables', type: ExecuteOrcasScriptsTask){
+  scriptFiles=project.fileTree("src/main/sql/replaceables")
+  logname="replaceables"
+}
+
+task('compileReplaceables',dependsOn: 'installReplaceables', type:  OrcasCompileAllInvalidTask)
+
+task('postCompile', dependsOn: 'compileReplaceables', type: ExecuteOrcasOneTimeScriptsTask){
+  scriptfolder="src/main/scripts/post-compile"
+  logname="post-compile"
+}
+
+
+task('databaseDeployment', dependsOn: 'postCompile')
+
+
+task('checkConnection', type: OrcasCheckConnectionTask)
+       
+orcasconfiguration {
+          jdbcurl = "jdbc:oracle:thin:@192.168.56.10:1522:m2dc"
+          username = "hr_2"
+          password = "nichts"
+          loglevel = "info"
+}
+

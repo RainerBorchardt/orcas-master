@@ -1,0 +1,43 @@
+apply plugin: 'distribution'
+
+configurations 
+{
+  xtextDistribution 
+  {
+  }
+}
+
+dependencies 
+{
+  if( project.ext.prebuildorcasversion != null )
+  {
+    xtextDistribution project.ext.prebuildorcasversion
+    xtextDistribution project.ext.prebuildorcasversion.replace( 'orcas-main', 'orcas-main-extensionhandler' );
+  }
+  else
+  {
+    xtextDistribution project(':orcas_diff')
+    xtextDistribution project(':orcas_main_extensionhandler')
+  }
+}
+
+dependencies 
+{
+  xtextDistribution fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
+  xtextDistribution fileTree(dir: System.getenv("ORACLE_HOME"), include: '*.jar') // lookup jars directly inroot home-dir for instant clients
+}
+
+distributions 
+{
+  main 
+  {
+    contents 
+    {
+      from { configurations.xtextDistribution }
+    }
+  }
+}
+
+installDist.fileMode 0755
+
+

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff-actions>
+  <diff-action type="drop" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_DEFAULT" myattribute="mytext">
+    <!-- mycomment -->
+    <diff-action-reason type="surplus" object-type="table" object-name="TAB_DEL_COL" subobject-type="column" subobject-name="COL_DEFAULT" />
+    <statement>alter table TAB_DEL_COL add col_add varchar2(1)</statement>
+  </diff-action>
+</diff-actions>
