@@ -7,7 +7,7 @@
 	<version>7.8.7-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 
-	<name>com.opitzconsulting.orcas:orcas-maven-plugin</name>
+	<name>Orcas Maven Plugin</name>
 	<description>orcas maven plugin for orcas usage with maven</description>
 
 	<url>http://opitzconsulting.github.io/orcas</url>
