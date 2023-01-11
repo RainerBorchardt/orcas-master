@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
 
-//import oracle.jdbc.OracleDriver;
+import oracle.jdbc.OracleDriver;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
@@ -103,8 +103,9 @@ public class OrcasDbDoc extends Task
 
       Velocity.init( lProperties );
 
-      //Class.forName( "oracle.jdbc.OracleDriver" );
-      //if( OracleDriver.class != null );
+      Class.forName( "oracle.jdbc.OracleDriver" );
+      if( OracleDriver.class != null )
+        ;
 
       Connection lConnection = DriverManager.getConnection( _jdbcurl, _user, _password );
 

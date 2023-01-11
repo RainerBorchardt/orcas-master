@@ -17,7 +17,7 @@ configurations
   distributionConfig 
 }
 
-configurations.implementation.extendsFrom(configurations.libBase)
+configurations.compile.extendsFrom(configurations.libBase)
 configurations.distributionConfig.extendsFrom(configurations.libBase)
 
 sourceSets 
@@ -43,21 +43,8 @@ dependencies
 {
   libBase "org.apache.velocity:velocity:1.7"
   libBase fileTree(dir: System.getenv("ORACLE_HOME")+"/jdbc/lib", include: '*.jar')
-  implementation gradleApi()
+  compile gradleApi()
   distributionConfig files( jar.archivePath )
-  testImplementation 'junit:junit:4.12'
-  implementation 'junit:junit:4.12'
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
-}
-
-test {
-    useJUnitPlatform()
-
-    maxHeapSize = '1G'
-
-    testLogging {
-        events "passed"
-    }
 }
 
 distributions 

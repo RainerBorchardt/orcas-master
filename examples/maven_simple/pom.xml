@@ -9,6 +9,8 @@
      
       <name>Orcas Maven Example</name>
 
+	
+
   <build>
     <plugins>
       <plugin>
@@ -18,12 +20,12 @@
         <extensions>true</extensions>
 
         <dependencies>
-          <dependency>
-            <groupId>com.oracle.ojdbc</groupId>
-            <artifactId>ojdbc10</artifactId>
-            <version>19.3.0.0</version>
-          </dependency>
-        </dependencies>
+		<dependency>
+			<groupId>com.oracle.ojdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>19.3.0.0</version>
+		</dependency>
+	</dependencies>
 
         <configuration>
           <jdbcurl>jdbc:oracle:thin:@192.168.56.10:1522:m2dc</jdbcurl>
@@ -32,12 +34,6 @@
           <loglevel>info</loglevel>
         </configuration>        
       </plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.9.1</version>
-			  </plugin>
     </plugins>
   </build>
 

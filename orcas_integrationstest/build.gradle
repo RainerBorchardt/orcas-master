@@ -7,11 +7,11 @@ repositories {
 
 dependencies 
 {
-  implementation  'junit:junit:4.12'
-  implementation  group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
+  compile 'junit:junit:4.12'
+  compile group: 'com.opitzconsulting.orcas', name: 'orcas-main-extensionhandler',
                   version: '7.8.6'
 
-  implementation  group: 'com.oracle.ojdbc', name: 'ojdbc10', version: '19.3.0.0'
+  compile group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
 }
 
 

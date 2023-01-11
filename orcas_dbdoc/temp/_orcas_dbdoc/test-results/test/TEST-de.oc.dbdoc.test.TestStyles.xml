@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="de.oc.dbdoc.test.TestStyles" tests="2" skipped="0" failures="0" errors="0" timestamp="2023-01-06T09:49:48" hostname="LAPTOP-LM9GEKRQ" time="0.005">
-  <properties/>
-  <testcase name="testTableStyles" classname="de.oc.dbdoc.test.TestStyles" time="0.003"/>
-  <testcase name="testDiagramStyles" classname="de.oc.dbdoc.test.TestStyles" time="0.001"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
